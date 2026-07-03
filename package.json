@@ -2,7 +2,7 @@
   "name": "hydra-search",
   "displayName": "Hydra Search",
   "description": "A zero-latency remote ripgrep search engine for Samba servers.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "publisher": "chris-davidson",
   "license": "MIT",
   "icon": "resources/hydra-logo.png",
