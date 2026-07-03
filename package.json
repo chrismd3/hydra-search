@@ -1,0 +1,110 @@
+{
+  "name": "hydra-search",
+  "displayName": "Hydra Search",
+  "description": "Zero-latency remote ripgrep search engine via SSH page cache pipeline",
+  "version": "1.0.0",
+  "publisher": "chris-davidson",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrismd3/hydra-search.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+    "keywords": [
+    "search",
+    "remote",
+    "ssh",
+    "ripgrep",
+    "ram",
+    "cache",
+    "samba"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "hydra-search-gateway",
+          "title": "Hydra Search",
+          "icon": "$(search)"
+        }
+      ]
+    },
+    "views": {
+      "hydra-search-gateway": [
+        {
+          "id": "hydraRemoteSearch",
+          "name": "Remote Results"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "hydra-search.warmCache",
+        "title": "Hydra: Warm Remote Cache",
+        "category": "Hydra Search"
+      },
+      {
+        "command": "hydra-search.triggerSearch",
+        "title": "Hydra: Execute Remote RAM Sweep",
+        "category": "Hydra Search"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "hydra-search.triggerSearch",
+        "key": "ctrl+shift+f",
+        "mac": "cmd+shift+f"
+      }
+    ],
+    "configuration": {
+      "title": "Hydra Remote Search",
+      "properties": {
+        "hydraSearch.sshUser": {
+          "type": "string",
+          "default": "chris",
+          "description": "Target username for SSH authentication on the remote node."
+        },
+        "hydraSearch.sshHost": {
+          "type": "string",
+          "default": "192.168.5.105",
+          "description": "IP address or host address of the remote processing node."
+        },
+        "hydraSearch.remoteRootPath": {
+          "type": "string",
+          "default": "/opt/hydra-search",
+          "description": "Absolute path to the target development workspace root on the remote server."
+        },
+        "hydraSearch.localMountPrefix": {
+          "type": "string",
+          "default": "Z:",
+          "description": "The local mapped network drive letter or network path prefix representing the Samba mount share."
+        },
+        "hydraSearch.resultsDisplayMode": {
+          "type": "string",
+          "enum": [
+            "QuickPick",
+            "TreeView"
+          ],
+          "default": "QuickPick",
+          "description": "Choose how Hydra Search displays results. 'QuickPick' uses a fast keyboard-centric dropdown. 'TreeView' populates the dedicated sidebar."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "18.x",
+    "typescript": "^5.1.3"
+  }
+}

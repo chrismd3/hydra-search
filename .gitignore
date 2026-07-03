@@ -1,0 +1,17 @@
+# Node dependencies
+node_modules/
+
+# Compiled out files
+out/
+dist/
+
+# Packaged extension builds
+*.vsix
+
+# Local environment/test folders
+.vscode-test/
+.vscode/settings.json
+
+# OS generated files
+.DS_Store
+Thumbs.db
