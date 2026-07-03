@@ -25,9 +25,11 @@ This extension contributes the following settings. You must configure these to m
 
 * `hydraSearch.sshUser`: Target username for SSH authentication on the remote node.
 * `hydraSearch.sshHost`: IP address or hostname of the remote processing node.
-* `hydraSearch.remoteRootPath`: Absolute path to the target development workspace root on the remote server (e.g., `/opt/hydra-search`).
+* `hydraSearch.remoteRootPath`: Absolute path to the target development workspace root on the remote server (e.g., `/opt`).
 * `hydraSearch.localMountPrefix`: The local mapped network drive letter representing your Samba mount (e.g., `Z:`).
 * `hydraSearch.resultsDisplayMode`: Choose how results are displayed. Set to `QuickPick` for a fast, keyboard-centric dropdown, or `TreeView` for a persistent sidebar list.
+* `hydraSearch.overrideSearchPath`: *(Optional)* Hardcode a remote path to search, overriding the dynamic active workspace detection.
+* `hydraSearch.showWarmingStatus`: *(Optional)* Toggle the background status bar notification spinner when silently sweeping files into the remote RAM cache. Default is `true`.
 
 ## Usage & Commands
 
@@ -41,6 +43,12 @@ Hydra Search operates through two primary commands:
   * Runs a silent background process to pull your workspace from the remote disk into the Linux OS Page Cache. This runs automatically on startup and window focus, but can be triggered manually via the Command Palette.
 
 ## Release Notes
+
+### 1.0.4
+* Added `overrideSearchPath` setting for manual search targeting outside the active workspace.
+* Added `showWarmingStatus` toggle to allow completely silent background cache warming.
+* Fixed a case-sensitivity bug with Windows drive letter path translations.
+* Updated Marketplace icon for a cleaner, transparent look.
 
 ### 1.0.0
 * Initial release of Hydra Search.

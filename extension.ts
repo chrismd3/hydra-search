@@ -11,28 +11,48 @@ export function activate(context: vscode.ExtensionContext) {
 
     // 3. Command: The Cache Warmer
     const warmCacheCommand = vscode.commands.registerCommand('hydra-search.warmCache', () => {
-        vscode.window.withProgress({
-            location: vscode.ProgressLocation.Window,
-            cancellable: false,
-            title: 'Hydra: Warming Remote RAM Cache...'
-        }, async (progress) => {
-            const config = vscode.workspace.getConfiguration('hydraSearch');
-            const sshUser = config.get<string>('sshUser');
-            const sshHost = config.get<string>('sshHost');
-            const remotePath = config.get<string>('remoteRootPath');
+        const config = vscode.workspace.getConfiguration('hydra-search');
+        const showStatus = config.get<boolean>('showWarmingStatus', true);
+        const sshUser = config.get<string>('sshUser');
+        const sshHost = config.get<string>('sshHost');
+        const remotePath = config.get<string>('remoteRootPath');
 
-            return new Promise<void>((resolve, reject) => {
-                // Background SSH sweep to force Linux to load files into the Page Cache
-                const cmd = `ssh ${sshUser}@${sshHost} "rg . ${remotePath} > /dev/null 2>&1"`;
-                
-                exec(cmd, (error) => {
-                    // We ignore errors here because ripgrep returns an error code if it finds nothing, 
-                    // but the disk read still happens, warming the cache.
-                    vscode.window.showInformationMessage('Hydra: Remote RAM Cache Warmed.');
-                    resolve();
+        // Background SSH sweep to force Linux to load files into the Page Cache
+        const sshCommand = `ssh ${sshUser}@${sshHost} "rg . ${remotePath} > /dev/null 2>&1"`;       
+
+        // Decide whether to show the UI
+        if (showStatus) {
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Window,
+                cancellable: false,
+                title: 'Hydra: Warming Remote RAM Cache...'
+            }, async (progress) => {
+                return new Promise<void>((resolve) => {
+                    exec(sshCommand, { maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {
+                        // We ignore error code 1 here because ripgrep returns this if it finds nothing, 
+                        // but the disk read still happens, warming the cache.
+                        if (error) {
+                            if (error.code === 1) {
+                                vscode.window.showInformationMessage('Hydra: Remote RAM Cache Warmed.');
+                            } else {
+                                vscode.window.showErrorMessage(`Hydra: Cache warm failed: ${error.message}`);
+                                console.error(`Hydra: Cache warm failed: ${error.message}`);
+                            }
+                        } else {
+                            vscode.window.showInformationMessage('Hydra: Remote RAM Cache Warmed.');                    
+                        }
+                        resolve();
+                    });
                 });
             });
-        });
+        } else {
+            // Run the command silently in the background
+            exec(sshCommand, { maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {
+                if (error && error.code !== 1) {
+                    console.error(`Hydra: Cache warm failed: ${error.message}`);
+                }
+            });
+        }
     });
 
     // 4. Command: The Search Execution
@@ -44,12 +64,37 @@ export function activate(context: vscode.ExtensionContext) {
 
         if (!searchTerm) { return; }
 
-        const config = vscode.workspace.getConfiguration('hydraSearch');
+        // Get the local path of the first open workspace folder
+        const config = vscode.workspace.getConfiguration('hydra-search');
         const sshUser = config.get<string>('sshUser');
         const sshHost = config.get<string>('sshHost');
         const remotePath = config.get<string>('remoteRootPath');
         const localPrefix = config.get<string>('localMountPrefix', '');
         const displayMode = config.get<string>('resultsDisplayMode', 'QuickPick');
+        const overridePath = config.get<string>('overrideSearchPath', '');
+
+        let targetRemotePath = '';
+
+        // Check for the manual override first
+        if (overridePath.trim() !== '') {
+            targetRemotePath = overridePath;
+        } 
+        // If no override, dynamically calculate from the open workspace
+        else if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+            const localWorkspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+            // Create a case-insensitive regex to match the local prefix at the start of the string
+            const prefixRegex = new RegExp('^' + localPrefix!, 'i');
+
+            targetRemotePath = localWorkspacePath
+                .replace(prefixRegex, remotePath!)
+                .replace(/\\/g, '/'); 
+        } 
+        // Failsafe if neither exist
+        else {
+            vscode.window.showErrorMessage('Hydra: No workspace folder open and no override path configured.');
+            return;
+        }
 
         vscode.window.withProgress({
             location: vscode.ProgressLocation.Window,
@@ -57,11 +102,18 @@ export function activate(context: vscode.ExtensionContext) {
         }, async () => {
             return new Promise<void>((resolve) => {
                 // Execute the remote ripgrep search, outputting just the file paths containing the match
-                const cmd = `ssh ${sshUser}@${sshHost} "rg -l '${searchTerm}' ${remotePath}"`;
+                const cmd = `ssh ${sshUser}@${sshHost} "rg -l '${searchTerm}' ${targetRemotePath}"`;
                 
-                exec(cmd, async (error, stdout, stderr) => {
-                    if (error && stdout.trim() === '') {
-                        vscode.window.showInformationMessage('Hydra: No results found.');
+                exec(cmd, { maxBuffer: 1024 * 1024 * 10 }, async (error, stdout, stderr) => {
+                    
+                    if (error) {
+                        if (error.code === 1) {
+                            vscode.window.showInformationMessage('Hydra: No results found.');
+                        } else {
+                            // Catch actual SSH/Network failures
+                            vscode.window.showErrorMessage(`Hydra Search Failed: ${error.message}`);
+                            console.error(`Hydra Error: ${stderr || error.message}`);
+                        }
                         resolve();
                         return;
                     }
