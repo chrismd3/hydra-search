@@ -66,27 +66,32 @@
     "configuration": {
       "title": "Hydra Remote Search",
       "properties": {
-        "hydraSearch.sshUser": {
+        "hydra-search.sshUser": {
           "type": "string",
           "default": "chris",
           "description": "Target username for SSH authentication on the remote node."
         },
-        "hydraSearch.sshHost": {
+        "hydra-search.sshHost": {
           "type": "string",
           "default": "192.168.5.105",
           "description": "IP address or host address of the remote processing node."
         },
-        "hydraSearch.remoteRootPath": {
+        "hydra-search.remoteRootPath": {
           "type": "string",
-          "default": "/opt/hydra-search",
-          "description": "Absolute path to the target development workspace root on the remote server."
+          "default": "/opt",
+          "description": "Absolute path to the target development workspace root on the remote server"
         },
-        "hydraSearch.localMountPrefix": {
+        "hydra-search.overrideSearchPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional: Hardcode a remote path to search, overriding the dynamic workspace detection."
+        },
+        "hydra-search.localMountPrefix": {
           "type": "string",
           "default": "Z:",
           "description": "The local mapped network drive letter or network path prefix representing the Samba mount share."
         },
-        "hydraSearch.resultsDisplayMode": {
+        "hydra-search.resultsDisplayMode": {
           "type": "string",
           "enum": [
             "QuickPick",
@@ -94,6 +99,11 @@
           ],
           "default": "QuickPick",
           "description": "Choose how Hydra Search displays results. 'QuickPick' uses a fast keyboard-centric dropdown. 'TreeView' populates the dedicated sidebar."
+        },
+        "hydra-search.showWarmingStatus": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a background status bar notification when sweeping files into the remote RAM cache."
         }
       }
     }
