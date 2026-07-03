@@ -31,7 +31,7 @@
         {
           "id": "hydra-search-gateway",
           "title": "Hydra Search",
-          "icon": "$(search)"
+          "icon": "resources/hydra-icon.svg"
         }
       ]
     },
