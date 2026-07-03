@@ -2,7 +2,7 @@
   "name": "hydra-search",
   "displayName": "Hydra Search",
   "description": "Zero-latency remote ripgrep search engine via SSH page cache pipeline",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "publisher": "chris-davidson",
   "license": "MIT",
   "icon": "resources/hydra-logo.png",
