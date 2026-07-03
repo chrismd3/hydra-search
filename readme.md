@@ -1,6 +1,6 @@
 # Hydra Search 🐉
 
-A lightning-fast, zero-latency remote search engine for VS Code. 
+A lightning-fast, zero-latency remote search engine for VS Code that leverages ripgrep and OS page caching on massive Samba workspaces.
 
 Hydra Search bypasses your local file system to leverage your remote hypervisor's OS Page Cache and `ripgrep`. By executing searches directly in the remote machine's RAM and dynamically translating the paths back to your local Samba mount, it delivers massive speed boosts for large workspaces.
 
@@ -44,7 +44,7 @@ Hydra Search operates through two primary commands:
 
 ## Release Notes
 
-### 1.0.4
+### 1.0.5
 * Added `overrideSearchPath` setting for manual search targeting outside the active workspace.
 * Added `showWarmingStatus` toggle to allow completely silent background cache warming.
 * Fixed a case-sensitivity bug with Windows drive letter path translations.
