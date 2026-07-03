@@ -1,0 +1,17 @@
+# Ignore local debugging and testing configurations
+.vscode/**
+.vscode-test/**
+
+# Ignore all raw TypeScript source files (we only need the compiled JS in /out)
+*.ts
+
+# Ignore compiler and linter configurations
+tsconfig.json
+.eslintrc.json
+
+# Ignore previous packaged builds
+*.vsix
+
+# Ignore git and package manager config files
+.gitignore
+package-lock.json
